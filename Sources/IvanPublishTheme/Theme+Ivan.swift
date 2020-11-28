@@ -9,6 +9,7 @@ import Plot
 import Publish
 
 public extension Theme {
+
     static var ivan: Self {
         Theme(
             htmlFactory: IvanHTMLFactory(),
@@ -91,7 +92,9 @@ private struct IvanHTMLFactory<Site: Website>: HTMLFactory {
             .head(for: page, on: context.site),
             .body(
                 .header(for: context, selectedSection: nil),
-                .wrapper(.contentBody(page.body)),
+                .wrapper(
+
+                ),
                 .footer(for: context.site)
             )
         )
@@ -173,11 +176,13 @@ private extension Node where Context == HTML.BodyContext {
                 .if(sectionIDs.count > 1,
                     .nav(
                         .ul(.forEach(sectionIDs) { section in
-                            .li(.a(
-                                .class(section == selectedSection ? "selected" : ""),
-                                .href(context.sections[section].path),
-                                .text(context.sections[section].title)
-                            ))
+                            .li(
+                                .a(
+                                    .class(section == selectedSection ? "selected" : ""),
+                                    .href(context.sections[section].path),
+                                    .text(context.sections[section].title)
+                                )
+                            )
                         })
                     )
                 )
@@ -240,4 +245,3 @@ private extension Node where Context == HTML.BodyContext {
         )
     }
 }
-
