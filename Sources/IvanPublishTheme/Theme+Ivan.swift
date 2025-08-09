@@ -97,7 +97,6 @@ private struct IvanHTMLFactory<Site: Website>: HTMLFactory {
                 .header(for: context, selectedSection: item.sectionID),
                 .wrapper(
                     .article(
-                        .h1(.text(item.title)),
                         .p(
                             .class("meta"),
                             .text(formatDate(item.date))
