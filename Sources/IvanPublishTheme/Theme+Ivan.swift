@@ -5,8 +5,22 @@
 //  Created by Ivan C Myrvold on 28/11/2020.
 //
 
+
 import Plot
 import Publish
+import Foundation
+
+// Shared date formatter for Ivan theme
+private let ivanDateFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+    formatter.dateStyle = .medium
+    return formatter
+}()
+
+private func formatDate(_ date: Date) -> String {
+    ivanDateFormatter.string(from: date)
+}
 
 public extension Theme {
 
@@ -26,12 +40,23 @@ private struct IvanHTMLFactory<Site: Website>: HTMLFactory {
             .head(for: index, on: context.site),
             .body(
                 .header(for: context, selectedSection: nil),
+                .div(
+                    .class("hero"),
+                    .div(
+                        .class("hero-content"),
+                        .h1(.text(index.title)),
+                        .p(
+                            .class("description"),
+                            .text(context.site.description)
+                        ),
+                        .a(
+                            .class("cta"),
+                            .href("/"),
+                            .text("Browse posts ↓")
+                        )
+                    )
+                ),
                 .wrapper(
-                    .h1(.text(index.title)),
-                    .p(
-                        .class("description"),
-                        .text(context.site.description)
-                    ),
                     .h2("Latest content"),
                     .itemList(
                         for: context.allItems(
@@ -72,12 +97,20 @@ private struct IvanHTMLFactory<Site: Website>: HTMLFactory {
                 .header(for: context, selectedSection: item.sectionID),
                 .wrapper(
                     .article(
+                        .h1(.text(item.title)),
+                        .p(
+                            .class("meta"),
+                            .text(formatDate(item.date))
+                        ),
                         .div(
                             .class("content"),
                             .contentBody(item.body)
                         ),
-                        .span("Tagged with: "),
-                        .tagList(for: item, on: context.site)
+                        .div(
+                            .class("post-tags"),
+                            .span("Tagged with: "),
+                            .tagList(for: item, on: context.site)
+                        )
                     )
                 ),
                 .footer(for: context.site)
@@ -194,14 +227,27 @@ private extension Node where Context == HTML.BodyContext {
         return .ul(
             .class("item-list"),
             .forEach(items) { item in
-                .li(.article(
-                    .h1(.a(
-                        .href(item.path),
-                        .text(item.title)
-                    )),
-                    .tagList(for: item, on: site),
-                    .p(.text(item.description))
-                ))
+                let daysSince = Calendar.current.dateComponents([.day], from: item.date, to: Date()).day ?? 999
+                let isNew = daysSince <= 14
+                return .li(
+                    .article(
+                        .h1(
+                            .a(
+                                .href(item.path),
+                                .text(item.title)
+                            )
+                        ),
+                        .p(
+                            .class("meta"),
+                            .group([
+                                .text(formatDate(item.date)),
+                                .if(isNew, .span(.class("badge new"), .text("NEW")))
+                            ])
+                        ),
+                        .tagList(for: item, on: site),
+                        .p(.text(item.description))
+                    )
+                )
             }
         )
     }
